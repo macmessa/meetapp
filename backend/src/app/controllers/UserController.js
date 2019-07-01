@@ -67,7 +67,7 @@ class UserController {
     return res.json({
       id,
       name,
-      userEmail,
+      email: userEmail,
     });
   }
 }
