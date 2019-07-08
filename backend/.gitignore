@@ -1,1 +1,7 @@
 node_modules
+
+# temp files
+tmp/uploads/*
+!tmp/uploads/.gitkeep
+
+.env
