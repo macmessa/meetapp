@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { isBefore, parseISO } from 'date-fns';
+import { isBefore, parseISO, startOfHour } from 'date-fns';
 import Meetup from '../models/Meetup';
 
 class MeetupController {
@@ -21,7 +21,7 @@ class MeetupController {
       return res.status(400).json({ error: 'Validation fails' });
     }
 
-    const date = parseISO(req.body.date);
+    const date = startOfHour(parseISO(req.body.date));
 
     // Check if is a past date
     if (isBefore(date, new Date())) {
@@ -44,10 +44,11 @@ class MeetupController {
         .json({ error: 'You already have a meetup for this date and time' });
     }
 
-    // Create a new meetup for with logged user as the owner
+    // Create a new meetup with logged user as the owner
     const meetup = await Meetup.create({
       ...req.body,
       user_id,
+      date,
     });
 
     return res.json(meetup);
