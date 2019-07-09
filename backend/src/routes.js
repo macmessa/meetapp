@@ -2,10 +2,11 @@ import { Router } from 'express';
 import multer from 'multer';
 import multerConfig from './config/multer';
 
+import authMiddleware from './app/middlewares/auth';
 import UserController from './app/controllers/UserController';
 import SessionController from './app/controllers/SessionController';
 import FileController from './app/controllers/FileController';
-import authMiddleware from './app/middlewares/auth';
+import MeetupController from './app/controllers/MeetupController';
 
 const routes = new Router();
 const upload = multer(multerConfig);
@@ -18,7 +19,12 @@ routes.use(authMiddleware);
 // Update user info
 routes.put('/users', UserController.update);
 
-// Save uploaded files
+// Handle uploaded files
 routes.post('/files', upload.single('file'), FileController.store);
+
+// Meetup routes
+routes.get('/meetups', MeetupController.index);
+routes.post('/meetups', MeetupController.store);
+routes.delete('/meetups', MeetupController.delete);
 
 export default routes;
