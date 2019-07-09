@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { startOfHour, isBefore, parseISO } from 'date-fns';
+import { isBefore, parseISO } from 'date-fns';
 import Meetup from '../models/Meetup';
 
 class MeetupController {
@@ -21,21 +21,20 @@ class MeetupController {
       return res.status(400).json({ error: 'Validation fails' });
     }
 
-    const { date } = req.body;
-
-    // Set rounded hour to validate with current hour
-    const hourStart = startOfHour(parseISO(date));
+    const date = parseISO(req.body.date);
 
     // Check if is a past date
-    if (isBefore(hourStart, new Date())) {
+    if (isBefore(date, new Date())) {
       return res.status(400).json({ error: 'Past dates are not permitted' });
     }
+
+    const user_id = req.userId;
 
     // Check date availability
     const checkAvailability = await Meetup.findOne({
       where: {
-        user_id: req.userId,
-        date: hourStart,
+        user_id,
+        date,
       },
     });
 
@@ -44,8 +43,6 @@ class MeetupController {
         .status(400)
         .json({ error: 'You already have a meetup for this date and time' });
     }
-
-    const user_id = req.userId;
 
     // Create a new meetup for with logged user as the owner
     const meetup = await Meetup.create({
