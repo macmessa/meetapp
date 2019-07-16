@@ -1,6 +1,8 @@
 import { Op } from 'sequelize';
+import Mail from '../../lib/Mail';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
+import User from '../models/User';
 
 class SubscriptionController {
   async index(req, res) {
@@ -39,8 +41,16 @@ class SubscriptionController {
 
   async store(req, res) {
     const user_id = req.userId;
-
-    const meetup = await Meetup.findByPk(req.params.id);
+    const user = await User.findByPk(user_id);
+    const meetup = await Meetup.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,
+          required: true,
+          attributes: ['name', 'email'],
+        },
+      ],
+    });
 
     // Check if meetup exists
     if (!meetup) {
@@ -80,7 +90,6 @@ class SubscriptionController {
       include: [
         {
           model: Meetup,
-          as: 'meetup',
           required: true,
           where: {
             date: meetup.date,
@@ -99,6 +108,18 @@ class SubscriptionController {
     const subscription = await Subscription.create({
       meetup_id: meetup.id,
       user_id,
+    });
+
+    await Mail.sendMail({
+      to: `${user.name} <${user.email}>`,
+      subject: `Nova inscrição - ${meetup.title}`,
+      template: 'subscription',
+      context: {
+        organizer: meetup.User.name,
+        meetup: meetup.title,
+        user: user.name,
+        email: user.email,
+      },
     });
 
     return res.json(subscription);
