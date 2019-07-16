@@ -63,20 +63,6 @@ class MeetupController {
 
     const user_id = req.userId;
 
-    // Check date availability
-    const checkAvailability = await Meetup.findOne({
-      where: {
-        user_id,
-        date,
-      },
-    });
-
-    if (checkAvailability) {
-      return res
-        .status(400)
-        .json({ error: 'You already have a meetup for this date and time' });
-    }
-
     // Create a new meetup with logged user as the owner
     const meetup = await Meetup.create({
       ...req.body,
@@ -101,7 +87,6 @@ class MeetupController {
       return res.status(400).json({ error: 'Validation fails' });
     }
 
-    const user_id = req.userId;
     const meetup = await Meetup.findByPk(req.params.id);
     const date = startOfHour(parseISO(req.body.date));
 
@@ -113,20 +98,6 @@ class MeetupController {
     // Check if is a past date
     if (isBefore(date, new Date())) {
       return res.status(400).json({ error: 'Past dates are not permitted' });
-    }
-
-    const checkAvailability = await Meetup.findOne({
-      where: {
-        user_id,
-        date,
-      },
-    });
-
-    // Check date availability in case there are other meetups
-    if (checkAvailability && checkAvailability.id !== meetup.id) {
-      return res
-        .status(400)
-        .json({ error: 'You already have a meetup for this date and time' });
     }
 
     // Check if meetup already happened or is happening
