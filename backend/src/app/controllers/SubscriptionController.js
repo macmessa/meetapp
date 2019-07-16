@@ -4,6 +4,7 @@ import Meetup from '../models/Meetup';
 
 class SubscriptionController {
   async index(req, res) {
+    const page = req.query.page || 1;
     let dateOp = Op.gt;
     let dateOrder = 'asc';
 
@@ -28,6 +29,8 @@ class SubscriptionController {
           },
         },
       ],
+      limit: 10,
+      offset: 10 * page - 10,
       order: [[Meetup, 'date', dateOrder]],
     });
 
